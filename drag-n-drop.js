@@ -1,5 +1,4 @@
-function makeDraggable(evt) {
-  var svg = evt.target;
+function makeDraggable(svg) {
 
   svg.addEventListener('mousedown', startDrag);
   svg.addEventListener('mousemove', drag);
@@ -12,7 +11,10 @@ function makeDraggable(evt) {
   svg.addEventListener('touchcancel', endDrag);
 
   function getMousePosition(evt) {
-    var CTM = evt.target.parentNode.getScreenCTM();
+    var getScreenCTM = evt.target.parentNode.getScreenCTM.bind(evt.target.parentNode) ||
+                       svg.getScreenCTM.bind(svg);
+
+    var CTM = getScreenCTM();
     if (evt.touches) { evt = evt.touches[0]; }
     return {
       x: (evt.clientX - CTM.e) / CTM.a,
@@ -24,6 +26,8 @@ function makeDraggable(evt) {
 
   function startDrag(evt) {
     selectedElement = evt.target;
+
+    selectedElement.parentNode.appendChild(selectedElement);
     offset = getMousePosition(evt);
 
     var transforms = selectedElement.transform.baseVal;
@@ -43,7 +47,12 @@ function makeDraggable(evt) {
     if (selectedElement) {
       evt.preventDefault();
       var coord = getMousePosition(evt);
-      transform.setTranslate(coord.x - offset.x, coord.y - offset.y);
+
+      var canTranslate = isEmpty(evt.target, coord);
+      console.log(canTranslate);
+      if(canTranslate) {
+        transform.setTranslate(coord.x - offset.x, coord.y - offset.y);
+      }
     }
   }
 
@@ -51,3 +60,38 @@ function makeDraggable(evt) {
     selectedElement = false;
   }
 }
+
+function isEmpty(elem, coords) {
+  elem.style.display = 'none';
+
+  var belowElement = document.elementFromPoint(coords.x, coords.y);
+  var isEmpty = isParent(elem, belowElement);
+
+  elem.style.display = 'block';
+
+  return isEmpty;
+}
+
+function isParent(element, elementToCheck) {
+  var isParent = false;
+
+  while(!(element.parentNode instanceof SVGSVGElement) && !isParent) {
+    isParent = element.parentNode === elementToCheck;
+    element = element.parentNode;
+  }
+
+  if(!isParent) {
+    isParent = isSvg(elementToCheck);
+  }
+
+  return isParent;
+}
+
+function isSvg(element) {
+  return element instanceof SVGSVGElement;
+}
+
+var svg = document.querySelectorAll('svg');
+svg.forEach(function (element) {
+  makeDraggable(element);
+});
