@@ -47,6 +47,7 @@ function makeDraggable(svg) {
   }
 
   function drag(evt) {
+    evt.preventDefault();
     if (!selectedElement) {
       return;
     }
@@ -55,18 +56,35 @@ function makeDraggable(svg) {
       endDrag();
     }
 
-    evt.preventDefault();
     let coord = getMousePosition(evt);
+    const tx = coord.x - offset.x;
+    const ty = coord.y - offset.y;
+    const rect = getRect(evt.target, tx, ty);
 
-    let canTranslate = isEmpty(evt);
+    let canTranslate = isEmpty(evt, rect);
     if(canTranslate) {
-      transform.setTranslate(coord.x - offset.x, coord.y - offset.y);
+      transform.setTranslate(tx, ty);
     }
   }
 
   function endDrag(evt) {
     selectedElement = null;
   }
+}
+
+function getRect(target, dx, dy) {
+  const rect = target.getBoundingClientRect();
+
+  return {
+    left: rect.left,
+    right: rect.right,
+    bottom: rect.bottom,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+    x: rect.x + dx,
+    y: rect.y + dy,
+  };
 }
 
 const svg = document.querySelectorAll('svg');
