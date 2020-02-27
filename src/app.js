@@ -1,4 +1,6 @@
 import {isEmpty} from "./is-empty";
+import {resolveGetScreenCtm} from "./resolve-get-screen-ctm";
+import {shouldCreateTranslate} from "./should-create-translate";
 
 function makeDraggable(svg) {
 
@@ -13,8 +15,7 @@ function makeDraggable(svg) {
   svg.addEventListener('touchcancel', endDrag);
 
   function getMousePosition(evt) {
-    const getScreenCTM = evt.target.parentNode.getScreenCTM.bind(evt.target.parentNode) ||
-                       svg.getScreenCTM.bind(svg);
+    const getScreenCTM = resolveGetScreenCtm(evt.target, svg);
 
     const CTM = getScreenCTM();
     if (evt.touches) { evt = evt.touches[0]; }
@@ -34,7 +35,7 @@ function makeDraggable(svg) {
 
     let transforms = selectedElement.transform.baseVal;
 
-    if (transforms.length === 0 || transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE) {
+    if (shouldCreateTranslate(transforms)) {
       let translate = svg.createSVGTransform();
       translate.setTranslate(0, 0);
       selectedElement.transform.baseVal.insertItemBefore(translate, 0);
@@ -51,7 +52,6 @@ function makeDraggable(svg) {
     }
 
     if(evt.target !== selectedElement) {
-      console.log('end 1');
       endDrag();
     }
 
@@ -65,8 +65,7 @@ function makeDraggable(svg) {
   }
 
   function endDrag(evt) {
-    console.log('end!');
-    selectedElement = false;
+    selectedElement = null;
   }
 }
 
