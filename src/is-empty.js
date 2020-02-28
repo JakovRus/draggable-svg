@@ -1,26 +1,29 @@
 import {getCoordinates} from "./get-coordinates";
 
 export function isEmpty(event) {
-  let elem = event.target;
-  const boundingRect = elem.getBoundingClientRect();
-  elem.style.display = 'none';
+  const element = event.target;
+  const boundingRect = element.getBoundingClientRect();
 
-  let coords = getCoordinates(event, boundingRect);
-  let belowElement = null;
+  hideElement(element);
 
-  let isEmpty = coords.reduce(function (result, currentValue) {
-    belowElement = document.elementFromPoint(
+  const coordinates = getCoordinates(event, boundingRect);
+  const reducer = getReducer(element);
+  const isEmpty = coordinates.reduce(reducer, true);
+
+  showElement(element);
+
+  return isEmpty;
+}
+
+function getReducer(element) {
+  return function (result, currentValue) {
+    const belowElement = document.elementFromPoint(
       currentValue.x,
       currentValue.y
     );
 
-    return isParent(elem, belowElement) && result;
-  }, true);
-
-
-  elem.style.display = 'block';
-
-  return isEmpty;
+    return isParent(element, belowElement) && result;
+  }
 }
 
 function isParent(element, elementToCheck) {
@@ -44,4 +47,12 @@ function shouldCheckParent(parentNode) {
 
 function isSvg(element) {
   return element instanceof SVGSVGElement;
+}
+
+function showElement(element) {
+  element.style.display = 'block';
+}
+
+function hideElement(element) {
+  element.style.display = 'none';
 }
