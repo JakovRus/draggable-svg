@@ -26,7 +26,7 @@ export function isEmpty(event) {
 function isParent(element, elementToCheck) {
   let isParent = false;
 
-  while(element.parentNode  && !(element.parentNode instanceof SVGSVGElement) && !isParent) {
+  while(shouldCheckParent(element.parentNode) && !isParent) {
     isParent = element.parentNode === elementToCheck;
     element = element.parentNode;
   }
@@ -36,6 +36,10 @@ function isParent(element, elementToCheck) {
   }
 
   return isParent;
+}
+
+function shouldCheckParent(parentNode) {
+  return parentNode  && !(parentNode instanceof SVGSVGElement);
 }
 
 function isSvg(element) {
