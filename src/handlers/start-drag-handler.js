@@ -1,22 +1,53 @@
-import {shouldCreateTranslate} from "../should-create-translate";
 import {getMousePosition, resolveGetScreenCtm} from "../get-mouse-position";
 
 export function getStartDragHandler(svg, dragParams) {
   return function (evt) {
-    dragParams.selectedElement = evt.target;
-    dragParams.selectedElement.parentNode.appendChild(dragParams.selectedElement);
-    dragParams.offset = getMousePosition(evt, svg);
+    initializeDrag(evt, svg, dragParams);
 
-    let transforms = dragParams.selectedElement.transform.baseVal;
-
-    if (shouldCreateTranslate(transforms)) {
-      let translate = svg.createSVGTransform();
-      translate.setTranslate(0, 0);
-      dragParams.selectedElement.transform.baseVal.insertItemBefore(translate, 0);
+    if (shouldCreateTranslate(dragParams)) {
+      createTranslate(svg, dragParams);
     }
 
-    dragParams.transform = transforms.getItem(0);
-    dragParams.offset.x -= dragParams.transform.matrix.e;
-    dragParams.offset.y -= dragParams.transform.matrix.f;
+    startDrag(dragParams);
   }
+}
+
+function initializeDrag(evt, svg, dragParams) {
+  dragParams.selectedElement = evt.target;
+  dragParams.selectedElement
+    .parentNode
+    .appendChild(
+      dragParams.selectedElement
+    );
+
+  dragParams.offset = getMousePosition(evt, svg);
+}
+
+function createTranslate(svg, dragParams) {
+  const translate = svg.createSVGTransform();
+
+  translate.setTranslate(0, 0);
+  dragParams.selectedElement
+    .transform
+    .baseVal
+    .insertItemBefore(translate, 0);
+}
+
+function shouldCreateTranslate(dragParams) {
+  const transforms = getTransforms(dragParams);
+
+  return transforms.length === 0 ||
+    transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE;
+}
+
+function getTransforms(dragParams) {
+  return dragParams.selectedElement.transform.baseVal;
+}
+
+function startDrag(dragParams) {
+  const transforms = getTransforms(dragParams);
+
+  dragParams.transform = transforms.getItem(0);
+  dragParams.offset.x -= dragParams.transform.matrix.e;
+  dragParams.offset.y -= dragParams.transform.matrix.f;
 }
