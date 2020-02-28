@@ -3,12 +3,12 @@ import {getDragHandler} from "./handlers/drag-handler";
 import {getEndDragHandler} from "./handlers/end-drag-handler";
 
 function makeDraggable(svg) {
-  let dragParams = {
+  const dragParams = {
     selectedElement: null,
     offset: null,
     transform: null,
   };
-  
+
   const startDrag = getStartDragHandler(svg, dragParams);
   const drag = getDragHandler(svg, dragParams);
   const endDrag = getEndDragHandler(dragParams);

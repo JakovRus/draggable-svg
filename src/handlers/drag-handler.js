@@ -8,18 +8,25 @@ export function getDragHandler(svg, dragParams) {
       return;
     }
 
-    if (evt.target !== dragParams.selectedElement) {
-      endDrag();
-    }
-
-    let coord = getMousePosition(evt, svg);
-    const tx = coord.x - dragParams.offset.x;
-    const ty = coord.y - dragParams.offset.y;
-    const rect = evt.target.getBoundingClientRect();
-
-    let canTranslate = isEmpty(evt, rect);
+    const canTranslate = isEmpty(evt);
     if (canTranslate) {
-      dragParams.transform.setTranslate(tx, ty);
+      setTranslate(evt, svg, dragParams);
     }
   }
+}
+
+function getTranslates(evt, svg, dragParams) {
+  const coordinates = getMousePosition(evt, svg);
+  const tx = coordinates.x - dragParams.offset.x;
+  const ty = coordinates.y - dragParams.offset.y;
+
+  return {tx, ty};
+}
+
+function setTranslate(evt, svg, dragParams) {
+  const translates = getTranslates(evt, svg, dragParams);
+  dragParams.transform.setTranslate(
+    translates.tx,
+    translates.ty
+  );
 }

@@ -1,7 +1,8 @@
 import {getCoordinates} from "./get-coordinates";
 
-export function isEmpty(event, boundingRect) {
+export function isEmpty(event) {
   let elem = event.target;
+  const boundingRect = elem.getBoundingClientRect();
   elem.style.display = 'none';
 
   let coords = getCoordinates(event, boundingRect);
